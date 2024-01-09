@@ -1,5 +1,5 @@
 QuickRUN
 
-pip install flask
+pip install -r requirements.txt
 
 python main.py
