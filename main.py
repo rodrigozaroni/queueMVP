@@ -6,7 +6,7 @@ app = Flask(__name__)
 # Function to get the database connection
 def get_db():
     if 'db' not in g:
-        g.db = sqlite3.connect('restaurant_queue.db')
+        g.db = sqlite3.connect('queue_MVP.db')
     return g.db
 
 @app.teardown_appcontext
@@ -16,14 +16,20 @@ def close_db(error):
 
 # Moved database initialization inside a function
 def init_db():
-    conn = sqlite3.connect('restaurant_queue.db')
+    conn = sqlite3.connect('queue_MVP.db')
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS customers
                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
                   queue_position INTEGER DEFAULT 0,
                   name TEXT,
                   email TEXT UNIQUE,
-                  phone TEXT)''')
+                  phone TEXT,
+                  restaurant_code TEXT)''')
+    # Create a table for restaurants
+    c.execute('''CREATE TABLE IF NOT EXISTS restaurants
+                 (restaurant_code TEXT PRIMARY KEY,
+                  restaurant_name TEXT,
+                  address TEXT)''')
     conn.commit()
     conn.close()
 
@@ -38,11 +44,17 @@ def index():
 def customer_form():
     db = get_db()  # Get the database connection within the same thread
     c = db.cursor()  # Create a cursor
+
+    # Fetch restaurant data from the "restaurants" table
+    c.execute("SELECT restaurant_code, restaurant_name FROM restaurants")
+    restaurants = c.fetchall()
+
     if request.method == 'POST':
         # Handle form submission
         name = request.form.get('name')
         email = request.form.get('email')
         phone = request.form.get('phone')
+        restaurant_code = request.form.get('restaurant_code')  # Restaurant code from the form
 
         # Check if the customer already exists based on email or phone
         c.execute("SELECT id, name FROM customers WHERE email=? OR phone=?", (email, phone))
@@ -54,9 +66,10 @@ def customer_form():
             new_queue_position = 5  # Replace with your queue management logic
             # Redirect the customer to the customer queue route with their customer_id
             return redirect(url_for('customer_queue', customer_id=customer_id))
-
-        # If the customer is new, insert their data into the database (you can adapt this to your database setup)
-        c.execute("INSERT INTO customers (name, email, phone) VALUES (?, ?, ?)", (name, email, phone))
+        
+        # If the customer is new, insert their data into the database
+        c.execute("INSERT INTO customers (name, email, phone, restaurant_code) VALUES (?, ?, ?, ?)",
+                  (name, email, phone, restaurant_code))
         db.commit()
 
         # Simulate queue position change for new customers
@@ -79,6 +92,32 @@ def customer_queue(customer_id):
         return render_template('customer_queue.html', queue_position=queue_position[0])
     else:
         return jsonify({"error": "Customer not found"})
+
+@app.route('/add_restaurant', methods=['GET', 'POST'])
+def add_restaurant():
+    db = get_db()  # Get the database connection within the same thread
+    c = db.cursor()  # Create a cursor
+
+    if request.method == 'POST':
+        restaurant_code = request.form.get('restaurant_code')
+        restaurant_name = request.form.get('restaurant_name')
+        address = request.form.get('address')
+
+        # Check if the restaurant with the given code already exists
+        c.execute("SELECT * FROM restaurants WHERE restaurant_code=?", (restaurant_code,))
+        existing_restaurant = c.fetchone()
+
+        if existing_restaurant:
+            return "Restaurant with this code already exists."
+
+        # Insert the new restaurant information into the database
+        c.execute("INSERT INTO restaurants (restaurant_code, restaurant_name, address) VALUES (?, ?, ?)",
+                  (restaurant_code, restaurant_name, address))
+        db.commit()
+
+        return "Restaurant added successfully."
+
+    return render_template('add_restaurant.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
