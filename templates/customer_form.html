@@ -19,6 +19,20 @@
             <label for="phone">Phone:</label>
             <input type="text" id="phone" name="phone" required><br>
 
+            <label for="restaurant_code">Restaurant:</label>
+
+
+            <select id="restaurant_code" name="restaurant_code" required>
+                <option value="" disabled selected>Select a restaurant</option>
+                <option value="00">REST TESTE</option>
+                <!-- Populate options from the "restaurants" table -->
+                {% for restaurant in restaurants %}
+                    <option value="{{ restaurant.restaurant_code }}">{{ restaurant.restaurant_name }}</option>
+                {% endfor %}
+            </select>
+
+            <br>
+
             <input type="submit" value="Join Queue" class="btn">
         </form>
     </div>
