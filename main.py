@@ -120,4 +120,4 @@ def add_restaurant():
     return render_template('add_restaurant.html')
 
 if __name__ == '__main__':
-    app.run(debug=True, port=443)
+    app.run(host='0.0.0.0', port=443, debug=True)
