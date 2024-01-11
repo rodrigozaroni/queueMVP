@@ -3,14 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurant Queue Control</title>
+    <title>Controle de Fila de Restaurantes</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Welcome to the Restaurant Queue Control System</h1>
-        <p>Fill out the form below to join the queue:</p>
-        <a href="/customer_form" class="btn">Join the Queue</a>
+        <h1>Bem-vindo ao Sistema de Controle de Fila do Restaurante</h1>
+        <img src="imagem_do_restaurante.jpg" alt="Restaurante" class="restaurant-image">
+        <p>Preencha o formulário abaixo para entrar na fila:</p>
+        <a href="/customer_form" class="btn join-queue-btn">Entrar na Fila</a>
+        <div class="promotions">
+            <h2>Promoções Especiais</h2>
+            <p>Confira nossas ofertas exclusivas!</p>
+            <!-- Adicione informações sobre promoções aqui -->
+        </div>
     </div>
 </body>
 </html>
